@@ -94,6 +94,7 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 
 ## Multi dimensional systems
 ## Adjust of Nonlinear Functions
+symbolsList = [x,y]
 
 def jacobian(functionArray):
 	jacobian = []
@@ -107,7 +108,7 @@ def jacobian(functionArray):
 
 	# symbolsList = list(symbolsSet)
 
-	symbolsList = [x, y, z]
+	global symbolsList
 	
 	for i in range(functionArray.size):
 		temp = []
@@ -116,45 +117,49 @@ def jacobian(functionArray):
 		jacobian.append(temp)
 	return jacobian
 
-
-def changeValuesMatrix(functionMatrix, valueArray):
-	symbolslist = [x, y, z]
+def changeValuesMatrix(matrix, valueArray):
+	global symbolsList
+	functionMatrix = matrix[:]
 	for i in range(len(functionMatrix)):
 		for j in range(len(functionMatrix[i])):
-			for k in range(len(symbolslist)):
-				functionMatrix[i][j] = functionMatrix[i][j].subs(symbolslist[k], valueArray[k])
+			for k in range(len(symbolsList)):
+				functionMatrix[i][j] = functionMatrix[i][j].subs(symbolsList[k], valueArray[k])
 	return functionMatrix
 
 def changeValuesArray(functionArray, valueArray):
-	symbolslist = [x, y, z]
+	global symbolsList
 	for i in range(len(functionArray)):
-		for k in range(len(symbolslist)):
-				functionArray[i] = functionArray[i].subs(symbolslist[k], valueArray[k])
+		for k in range(len(symbolsList)):
+				functionArray[i] = functionArray[i].subs(symbolsList[k], valueArray[k])
 	return functionArray
 
 functionArray1 = np.array([16*(x**4)+16*(y**4)+(z**4)-16, (x**2)+(y**2)+(z**2)-3, (x**3)-y+z-1])
-
+functionArray2 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
 def multiDimensionalNewtonMethod(functionArray, X0):
-	iterations = 1
+	iterations = 7
 	jacob = jacobian(functionArray)
 	lastX = X0
 
 	for i in range(iterations):
+		print("jacob", jacob)
 		j = changeValuesMatrix(jacob, lastX)
 		f = changeValuesArray(functionArray, lastX)
-		#print ("j", j, "j fim")
 
-		j_np = np.array(j)
-		f_np = np.array(f)
-		print(j_np)
-		#print("j_np", j_np, "fim j_np")
-
+		j_np = np.array(j).astype(np.float64)
+		f_np = np.array(f).astype(np.float64)
+		print(lastX)
 		deltaX = -np.dot(inv(j_np),f_np)
+		lastX = lastX + deltaX
+
+		tolk = np.linalg.norm(deltaX, ord=2) / np.linalg.norm(lastX, ord=2)
+		if (tolk < tolerance):
+			return lastX
 
 
-	return deltaX
+	return "Convergence not reached"
 
-a = np.array([[64,64,4],[2,2,2],[3,-1,1]])
-ainv = inv(a)
-print(a)
-print(multiDimensionalNewtonMethod(functionArray1,[1,1,1]))
+
+print(multiDimensionalNewtonMethod(functionArray2,[2,3]))
+# t = [-1415.66666667, -1415.66666667,  2834.33333333]
+
+# print(16*(t[0]**4)+16*(t[1]**4)+(t[2]**4))
