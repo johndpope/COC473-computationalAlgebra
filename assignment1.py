@@ -1,45 +1,31 @@
 from numpy.linalg import inv
 import numpy as np
 from math import *
-
+from sympy import *
+x,y,z = symbols('x y z')
+init_printing(use_unicode=True)
 
 tolerance = 0.0001
+g = 9.806
+k = 0.00341
+testFunction1 = log(cosh(x*sqrt(g*k))) - 50
+testFunction2 = 4*cos(x)- exp(2*x)
 
-
-def testFuction1(x,derivative = 0):
-	# root found on Wolfram Alpha = 277 or -277
-	# returns function value at x if derivative = 0 (default)
-	# returns derivate of f ate x if dirivative = 1 
-	g = 9.806
-	k = 0.00341
-	functionValue = log(cosh(x*sqrt(g*k))) - 50
-	derivativeValue = sqrt(g*k)*tanh(x*sqrt(g*k))
-	if (derivative == 1):
-		return derivativeValue
-	return functionValue
-
-def testFuction2(x,derivative = 0):
-	# root found on Wolfram Alpha = [-14.1,-10.9,-7.85,-4.71,-1.55,0.597]
-	functionValue = 4*cos(x)- exp(2*x)
-	derivativeValue = -2*(exp(2*x)+2*sin(x))
-	if (derivative == 1):
-		return derivativeValue
-	return functionValue
 
 ## Bissection Method
 def bissectionMethod(function,a,b,tol):
 	iterations = 0
 	while(abs(a-b) > tol and iterations <100):
 		rootPoint = (a+b)/2
-		rootValue = function(rootPoint)
+		rootValue = function.subs(x,rootPoint)
 		if(rootValue > 0):
 			b = rootPoint 
 		else:
 			a = rootPoint 
 		iterations+= 1
 	return rootPoint			
-# print(bissectionMethod(testFuction2,-30.0,10.0,tolerance ))
-# print(bissectionMethod(testFuction1,-1000.0,1000.0,tolerance ))
+#print(bissectionMethod(testFunction2,-30.0,10.0,tolerance))
+#print(bissectionMethod(testFunction1,-1000.0,1000.0,tolerance))
 
 ## Newton Method
 ## TO DO  - Metodo esta convergindo para valores que nao deveria (eg -50)
@@ -48,16 +34,16 @@ def newtonMetod(function,initialValue,tol):
 	rootPoint = initialValue
 	for i in range (iterations):
 		lastRoot = rootPoint  
-		rootPoint  = rootPoint - (function(rootPoint)/function(rootPoint,1))
+		rootPoint  = rootPoint - (function.subs(x,rootPoint)/diff(function,x).subs(x,rootPoint))
 	if(abs(rootPoint - lastRoot) < tol):
 		return rootPoint
 	else:
 		return "convergence not reached"
 
-# print(newtonMetod(testFuction1,200,tolerance))
-# print(newtonMetod(testFuction2,15,tolerance))
-# print(newtonMetod(testFuction2,-10,tolerance))
-# print(newtonMetod(testFuction2,-15,tolerance))
+#print(newtonMetod(testFunction1,200,tolerance))
+#print(newtonMetod(testFuction2,15,tolerance))
+#print(newtonMetod(testFuction2,-10,tolerance))
+#print(newtonMetod(testFuction2,-15,tolerance))
 
 
 ## Secant Method
@@ -70,7 +56,7 @@ def secantMethod(function,initialValue,tol):
 	rootPoint = lastRoot + delta
 	fa = function(lastRoot)
 	for i in range (iterations):
-		fi = function(rootPoint	)
+		fi = function.subs(x,rootPoint)
 		rootPoint = rootPoint - (fi * (rootPoint-lastRoot))/(fi-fa)
 		if(abs(rootPoint - lastRoot) < tol):
 			return rootPoint
@@ -78,10 +64,10 @@ def secantMethod(function,initialValue,tol):
 			fa = fi
 	return "convergence not reached"
 
-# print(newtonMetod(testFuction1,200,tolerance))
-# print(newtonMetod(testFuction2,15,tolerance))
-# print(newtonMetod(testFuction2,-10,tolerance))
-# print(newtonMetod(testFuction2,-15,tolerance))
+#print(newtonMetod(testFuction1,200,tolerance))
+#print(newtonMetod(testFuction2,15,tolerance))
+#print(newtonMetod(testFuction2,-10,tolerance))
+#print(newtonMetod(testFuction2,-15,tolerance))
 
 
 
@@ -100,32 +86,75 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 		else:
 			i = y.index(max(y))
 			x[i] = rootPoint
-			y[i] = function(x[i])
+			y[i] = function.subs(x,x[i])
 			lastRoot = rootPoint
 	return "Convergence not reached"
 
-# print(inverseInterpolationMethod(testFuction1,200,250,260,tolerance))
+#print(inverseInterpolationMethod(testFuction1,200,250,260,tolerance))
 
 ## Multi dimensional systems
-
-# def multiDimensionalNewtonMethod(system):
-# 	iterations = 1000
-# 	systemDimension = system.shape
-# 	lastX = np.random.random((systemDimension[0],systemDimension[1]))*10
-# 	for i in range(iterations):
-
-
-
 ## Adjust of Nonlinear Functions
 
-def jacobian(x):
+def jacobian(functionArray):
+	jacobian = []
+	 
+	# TODO: check if need to get symbolslist from functionArray
+	# symbolsSet = []
+	# for i in functionArray:
+	# 	s = i.free_symbols
+	# 	if len(s) > len(symbolsSet):
+	# 		symbolsSet = s
+
+	# symbolsList = list(symbolsSet)
+
+	symbolsList = [x, y, z]
 	
+	for i in range(functionArray.size):
+		temp = []
+		for j in range(len(symbolsList)):
+			temp.append(diff(functionArray[i], symbolsList[j]))
+		jacobian.append(temp)
+	return jacobian
 
-a = np.array([(1.5,2,3), (4,5,6)])
-b = np.random.random((2,3))*10
 
-p = np.poly1d([2,3, 1, 2])
-print(p)
-q = p.deriv()
-print (q)
-print(q(1))
+def changeValuesMatrix(functionMatrix, valueArray):
+	symbolslist = [x, y, z]
+	for i in range(len(functionMatrix)):
+		for j in range(len(functionMatrix[i])):
+			for k in range(len(symbolslist)):
+				functionMatrix[i][j] = functionMatrix[i][j].subs(symbolslist[k], valueArray[k])
+	return functionMatrix
+
+def changeValuesArray(functionArray, valueArray):
+	symbolslist = [x, y, z]
+	for i in range(len(functionArray)):
+		for k in range(len(symbolslist)):
+				functionArray[i] = functionArray[i].subs(symbolslist[k], valueArray[k])
+	return functionArray
+
+functionArray1 = np.array([16*(x**4)+16*(y**4)+(z**4)-16, (x**2)+(y**2)+(z**2)-3, (x**3)-y+z-1])
+
+def multiDimensionalNewtonMethod(functionArray, X0):
+	iterations = 1
+	jacob = jacobian(functionArray)
+	lastX = X0
+
+	for i in range(iterations):
+		j = changeValuesMatrix(jacob, lastX)
+		f = changeValuesArray(functionArray, lastX)
+		#print ("j", j, "j fim")
+
+		j_np = np.array(j)
+		f_np = np.array(f)
+		print(j_np)
+		#print("j_np", j_np, "fim j_np")
+
+		deltaX = -np.dot(inv(j_np),f_np)
+
+
+	return deltaX
+
+a = np.array([[64,64,4],[2,2,2],[3,-1,1]])
+ainv = inv(a)
+print(a)
+print(multiDimensionalNewtonMethod(functionArray1,[1,1,1]))
