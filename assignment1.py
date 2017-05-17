@@ -1,6 +1,7 @@
 from numpy.linalg import inv
 import numpy as np
 from math import *
+from copy import deepcopy
 from sympy import *
 x,y,z = symbols('x y z')
 init_printing(use_unicode=True)
@@ -94,9 +95,9 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 
 ## Multi dimensional systems
 ## Adjust of Nonlinear Functions
-symbolsList = [x,y]
+symbolsList = [x,y,z]
 
-def jacobian(functionArray):
+def jacobian(funcArray):
 	jacobian = []
 	 
 	# TODO: check if need to get symbolslist from functionArray
@@ -109,6 +110,7 @@ def jacobian(functionArray):
 	# symbolsList = list(symbolsSet)
 
 	global symbolsList
+	functionArray = deepcopy(funcArray)
 	
 	for i in range(functionArray.size):
 		temp = []
@@ -119,15 +121,16 @@ def jacobian(functionArray):
 
 def changeValuesMatrix(matrix, valueArray):
 	global symbolsList
-	functionMatrix = matrix[:]
+	functionMatrix = deepcopy(matrix)
 	for i in range(len(functionMatrix)):
 		for j in range(len(functionMatrix[i])):
 			for k in range(len(symbolsList)):
 				functionMatrix[i][j] = functionMatrix[i][j].subs(symbolsList[k], valueArray[k])
 	return functionMatrix
 
-def changeValuesArray(functionArray, valueArray):
+def changeValuesArray(array, valueArray):
 	global symbolsList
+	functionArray = deepcopy(array)
 	for i in range(len(functionArray)):
 		for k in range(len(symbolsList)):
 				functionArray[i] = functionArray[i].subs(symbolsList[k], valueArray[k])
@@ -136,18 +139,17 @@ def changeValuesArray(functionArray, valueArray):
 functionArray1 = np.array([16*(x**4)+16*(y**4)+(z**4)-16, (x**2)+(y**2)+(z**2)-3, (x**3)-y+z-1])
 functionArray2 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
 def multiDimensionalNewtonMethod(functionArray, X0):
-	iterations = 7
+	iterations = 15000
 	jacob = jacobian(functionArray)
 	lastX = X0
 
 	for i in range(iterations):
-		print("jacob", jacob)
 		j = changeValuesMatrix(jacob, lastX)
 		f = changeValuesArray(functionArray, lastX)
 
 		j_np = np.array(j).astype(np.float64)
 		f_np = np.array(f).astype(np.float64)
-		print(lastX)
+		
 		deltaX = -np.dot(inv(j_np),f_np)
 		lastX = lastX + deltaX
 
@@ -159,7 +161,8 @@ def multiDimensionalNewtonMethod(functionArray, X0):
 	return "Convergence not reached"
 
 
-print(multiDimensionalNewtonMethod(functionArray2,[2,3]))
-# t = [-1415.66666667, -1415.66666667,  2834.33333333]
+print(multiDimensionalNewtonMethod(functionArray1,[1,1,1]))
+t = [ 0.79040954,  0.80688815,  1.31308198]
 
-# print(16*(t[0]**4)+16*(t[1]**4)+(t[2]**4))
+
+print(16*(t[0]**4)+16*(t[1]**4)+(t[2]**4))
