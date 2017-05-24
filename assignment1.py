@@ -98,7 +98,8 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 
 ## Multi dimensional systems
 ## Adjust of Nonlinear Functions
-symbolsList = [x,y,z]
+#TODO: handle symbols for each function
+symbolsList = [x,y]
 
 def jacobian(funcArray):
 	jacobian = []
@@ -165,10 +166,10 @@ def multiDimensionalNewtonMethod(functionArray, X0):
 	return "Convergence not reached"
 
 
-print(multiDimensionalNewtonMethod(functionArray1,[1,1,1]))
-t = [ 0.79040954,  0.80688815,  1.31308198]
+# print(multiDimensionalNewtonMethod(functionArray1,[1,1,1]))
+# t = [ 0.79040954,  0.80688815,  1.31308198]
 
-print(16*(t[0]**4)+16*(t[1]**4)+(t[2]**4))
+# print(16*(t[0]**4)+16*(t[1]**4)+(t[2]**4))
 
 
 
@@ -182,22 +183,38 @@ def multiDimensionalBroydenMethod(functionArray, X0, B0):
 	for i in range(1, iterations+1):
 		j_np = B_list[i-1]
 
+		print("### iteraction: ",i," ---- B",j_np)
+
 		f_ant = changeValuesArray(functionArray, X_list[i-1])
 		f_np_ant = np.array(f_ant).astype(np.float64)
+
+		#print("### iteraction: ",i," ---- f_np_ant",f_np_ant)
 		
-		deltaX = -np.dot(inv(j_np),f_np)
+		deltaX = -np.dot(inv(j_np),f_np_ant)
 		X_list.append(X_list[i-1] + deltaX)
+
+		#print("### iteraction: ",i," ---- DELTA",deltaX)
 
 		f = changeValuesArray(functionArray, X_list[i])
 		f_np = np.array(f).astype(np.float64)
 
-		lastY = f_np - j_np_ant
+		lastY = f_np - f_np_ant
 
-		tolk = np.linalg.norm(deltaX, ord=2) / np.linalg.norm(lastX, ord=2)
+		#print("### iteraction: ",i," ---- Y",lastY)
+
+		tolk = np.linalg.norm(deltaX, ord=2) / np.linalg.norm(X_list[i], ord=2)
 		if (tolk < tolerance):
-			return lastX
+			return X_list[i]
 		else:
 			deltaX_transp = deltaX.transpose()
-			B_list.append(B_list[i-1] + np.dot(lastY-B_list[i-1], deltaX_transp) / np.dot(deltaX_transp, deltaX))
+			#TODO FIX DIVIDE MATRIX
+			next_B = B_list[i-1] + np.divide((np.dot(lastY-np.dot(B_list[i-1], deltaX), deltaX_transp)), np.dot(deltaX_transp, deltaX))
+			B_list.append(next_B)
+
+		print("### iteraction: ",i," ---- VALUE",X_list[i])
 
 	return "Convergence not reached"
+
+functionArray3 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
+b0_broyden = np.array([[1,2],[4,24]])
+print(multiDimensionalBroydenMethod(functionArray3,[2,3],b0_broyden))
