@@ -13,7 +13,8 @@ testFunction1 = log(cosh(x*sqrt(g*k))) - 50
 testFunction2 = 4*cos(x)- exp(2*x)
 
 
-## Bissection Method
+
+## 1 Bissection Method
 def bissectionMethod(function,a,b,tol):
 	iterations = 0
 	while(abs(a-b) > tol and iterations <100):
@@ -24,12 +25,15 @@ def bissectionMethod(function,a,b,tol):
 		else:
 			a = rootPoint 
 		iterations+= 1
-	return rootPoint			
+	return rootPoint
+
 #print(bissectionMethod(testFunction2,-30.0,10.0,tolerance))
 #print(bissectionMethod(testFunction1,-1000.0,1000.0,tolerance))
 
-## Newton Method
-## TO DO  - Metodo esta convergindo para valores que nao deveria (eg -50)
+
+
+## 2 Newton Method
+#TODO  - Metodo esta convergindo para valores que nao deveria (eg -50)
 def newtonMetod(function,initialValue,tol):
 	iterations = 1000
 	rootPoint = initialValue
@@ -47,8 +51,8 @@ def newtonMetod(function,initialValue,tol):
 #print(newtonMetod(testFuction2,-15,tolerance))
 
 
-## Secant Method
 
+## 2 Secant Method
 def secantMethod(function,initialValue,tol):
 	iterations = 1000
 	rootPoint = initialValue
@@ -72,8 +76,7 @@ def secantMethod(function,initialValue,tol):
 
 
 
-## Inverse Interpolation Method
-
+## 3 Inverse Interpolation Method
 def inverseInterpolationMethod(function,x1,x2,x3,tol):
 	lastRoot = pow(10,36)
 	iterations = 1000
@@ -138,6 +141,8 @@ def changeValuesArray(array, valueArray):
 
 functionArray1 = np.array([16*(x**4)+16*(y**4)+(z**4)-16, (x**2)+(y**2)+(z**2)-3, (x**3)-y+z-1])
 functionArray2 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
+
+## 4 Multi Dimensional Newton Method
 def multiDimensionalNewtonMethod(functionArray, X0):
 	iterations = 15000
 	jacob = jacobian(functionArray)
@@ -157,12 +162,42 @@ def multiDimensionalNewtonMethod(functionArray, X0):
 		if (tolk < tolerance):
 			return lastX
 
-
 	return "Convergence not reached"
 
 
 print(multiDimensionalNewtonMethod(functionArray1,[1,1,1]))
 t = [ 0.79040954,  0.80688815,  1.31308198]
 
-
 print(16*(t[0]**4)+16*(t[1]**4)+(t[2]**4))
+
+
+
+## 4 Multi Dimensional Broyden Method
+def multiDimensionalBroydenMethod(functionArray, X0, B0):
+	iterations = 15000
+	jacob = jacobian(functionArray)
+	X_list = [X0]
+	B_list = [B0] 		# receive the jacobian of start
+
+	for i in range(1, iterations+1):
+		j_np = B_list[i-1]
+
+		f_ant = changeValuesArray(functionArray, X_list[i-1])
+		f_np_ant = np.array(f_ant).astype(np.float64)
+		
+		deltaX = -np.dot(inv(j_np),f_np)
+		X_list.append(X_list[i-1] + deltaX)
+
+		f = changeValuesArray(functionArray, X_list[i])
+		f_np = np.array(f).astype(np.float64)
+
+		lastY = f_np - j_np_ant
+
+		tolk = np.linalg.norm(deltaX, ord=2) / np.linalg.norm(lastX, ord=2)
+		if (tolk < tolerance):
+			return lastX
+		else:
+			deltaX_transp = deltaX.transpose()
+			B_list.append(B_list[i-1] + np.dot(lastY-B_list[i-1], deltaX_transp) / np.dot(deltaX_transp, deltaX))
+
+	return "Convergence not reached"
