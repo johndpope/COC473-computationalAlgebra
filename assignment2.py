@@ -3,10 +3,10 @@ import numpy as np
 from math import *
 from copy import deepcopy
 from sympy import *
-x,y,z = symbols('x y z')
+x,y,z,w = symbols('x y z w')
 init_printing(use_unicode=True)
 
-def polynomialIntegration(numberOfpoints,interval,function):
+def polynomialIntegration(numberOfpoints,interval,function,IntegrationTerm,show = false):
 	# If numberOfPoints is less than 5, calculates the derivative using the given interval
 	# Althought, if numberOfPoints is bigger than 5, converts the interval to the Legendre-Gauss interval [-1,1] 
 	delta = (interval[1]-interval[0])/(numberOfpoints-1)
@@ -29,8 +29,8 @@ def polynomialIntegration(numberOfpoints,interval,function):
 	points.append([-0.1488743389816312,0.1488743389816312,-0.4333953941292472,0.4333953941292472,-0.6794095682990244,0.6794095682990244,-0.8650633666889845,0.8650633666889845,-0.9739065285171717,0.9739065285171717])
 	
 	elementIndex = numberOfpoints-1
-
-	print("PONTOS: ",points[elementIndex])
+	if(show):
+		print("PONTOS: ",points[elementIndex])
 	l = points[elementIndex][-1] - points[elementIndex][0]
 	result = 0
 
@@ -53,17 +53,45 @@ def polynomialIntegration(numberOfpoints,interval,function):
 	for i in range(len(points[elementIndex])):
 		if(numberOfpoints > 5):
 			adjustTerm = (interval[-1]-interval[0])/2
-			functionValue = function.subs(x,adjustTerm*points[elementIndex][i] + (interval[-1]+interval[0])/2)
+			functionValue = function.subs(IntegrationTerm,adjustTerm*points[elementIndex][i] + (interval[-1]+interval[0])/2)
 			weight = selectWeightArray[i]
 			result += adjustTerm*(functionValue * weight)
 		else:
-			functionValue = function.subs(x,points[elementIndex][i])
+			functionValue = function.subs(IntegrationTerm,points[elementIndex][i])
 			weight = selectWeightArray[i]
 			result += functionValue * weight
-
-		print ("RESULTADO PARA ",i+1," PONTOS: ",result)
+		if(show):	
+			print ("RESULTADO PARA ",i+1," PONTOS: ",result)
 	return result
 
 testFunction1 = exp(-x**2)
-interval =[0,1]
-print(polynomialIntegration(10,[0,1],testFunction1))
+testFunction2 = (1/2)*np.pi*exp((-1/2)*(x**2))
+
+# Question 3
+Wn = 1
+E = 0.05
+Sn = 2
+RAO = 1/(sqrt((1-(w/Wn)**2)**2)+(2*E*(w/Wn))**2)
+testFunction3 = (RAO**2)*Sn
+testFunction4 = (w**2)*(RAO**2)*Sn
+
+m0 = polynomialIntegration(10,[0,10],testFunction3,w)
+m2 = polynomialIntegration(10,[0,10],testFunction4,w)
+
+# print("QUESTION 3 m0: ",m0,"\n")
+# print("QUESTION 3 m2: ",m2,"\n")
+
+# Question 4
+# Change the Sn value used at question 3. 
+
+Hs = 3
+Tz = 5
+Sn = ((4 * (np.pi)**3 * (Hs)**2)/(w**5 * Tz**4))*exp((-16*np.pi**3)/(w**4 * Tz**4))
+
+m0_2 = polynomialIntegration(10,[0,10],testFunction3,w)
+m2_2 = polynomialIntegration(10,[0,10],testFunction4,w)
+
+# print("QUESTION 4 m0: ",m0_2,"\n")
+# print("QUESTION 4 m2: ",m2_2,"\n")
+
+# Question 5
