@@ -183,7 +183,7 @@ def multiDimensionalBroydenMethod(functionArray, X0, B0):
 	for i in range(1, iterations+1):
 		j_np = B_list[i-1]
 
-		print("### iteraction: ",i," ---- B",j_np)
+		# print("### iteraction: ",i," ---- B",j_np)
 
 		f_ant = changeValuesArray(functionArray, X_list[i-1])
 		f_np_ant = np.array(f_ant).astype(np.float64)
@@ -192,7 +192,6 @@ def multiDimensionalBroydenMethod(functionArray, X0, B0):
 		
 		deltaX = -np.dot(inv(j_np),f_np_ant)
 		X_list.append(X_list[i-1] + deltaX)
-
 		#print("### iteraction: ",i," ---- DELTA",deltaX)
 
 		f = changeValuesArray(functionArray, X_list[i])
@@ -200,18 +199,25 @@ def multiDimensionalBroydenMethod(functionArray, X0, B0):
 
 		lastY = f_np - f_np_ant
 
-		#print("### iteraction: ",i," ---- Y",lastY)
+		#print("### iteraction: ",i," ---- Y ",lastY)
 
 		tolk = np.linalg.norm(deltaX, ord=2) / np.linalg.norm(X_list[i], ord=2)
 		if (tolk < tolerance):
 			return X_list[i]
 		else:
-			deltaX_transp = deltaX.transpose()
+			testeDelta = np.asmatrix(deltaX)
+			deltaX_transp = np.transpose(deltaX)
+			testeDeltat = np.asmatrix(testeDelta.transpose())
+			print("delta x = ", testeDelta, "transp = ", deltaX_transp)
 			#TODO FIX DIVIDE MATRIX
-			next_B = B_list[i-1] + np.divide((np.dot(lastY-np.dot(B_list[i-1], deltaX), deltaX_transp)), np.dot(deltaX_transp, deltaX))
+			deltaTimesDeltaTranspose =  np.dot(testeDeltat, testeDelta)
+			#print("delta times detal transp ", deltaTimesDeltaTranspose)
+			productOfMatrix = np.dot(lastY-np.dot(B_list[i-1], deltaX), deltaX_transp)
+			#print("DIVISION ",productOfMatrix)
+			next_B = B_list[i-1] + productOfMatrix / deltaTimesDeltaTranspose
 			B_list.append(next_B)
 
-		print("### iteraction: ",i," ---- VALUE",X_list[i])
+		# print("### iteraction: ",i," ---- VALUE",X_list[i])
 
 	return "Convergence not reached"
 
