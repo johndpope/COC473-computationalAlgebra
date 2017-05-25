@@ -173,54 +173,72 @@ def multiDimensionalNewtonMethod(functionArray, X0):
 
 
 
+def changeValuesArrayBroyden(array, valueArray):
+	global symbolsList
+	functionArray = deepcopy(array)
+	for i in range(len(functionArray)):
+		for j in range(len(functionArray[i])):
+			for k in range(len(symbolsList)):
+				functionArray[i][j] = functionArray[i][j].subs(symbolsList[k], valueArray[k])
+	return functionArray
+
+
 ## 4 Multi Dimensional Broyden Method
 def multiDimensionalBroydenMethod(functionArray, X0, B0):
 	iterations = 15000
-	jacob = jacobian(functionArray)
 	X_list = [X0]
 	B_list = [B0] 		# receive the jacobian of start
 
 	for i in range(1, iterations+1):
 		j_np = B_list[i-1]
 
-		# print("### iteraction: ",i," ---- B",j_np)
+		#print("### iteraction: ",i," ---- B",j_np)
 
-		f_ant = changeValuesArray(functionArray, X_list[i-1])
+		f_ant = changeValuesArrayBroyden(functionArray, X_list[i-1])
+
+		#print("### iteraction: ",i," ---- f_ant",f_ant)
+
 		f_np_ant = np.array(f_ant).astype(np.float64)
 
 		#print("### iteraction: ",i," ---- f_np_ant",f_np_ant)
 		
 		deltaX = -np.dot(inv(j_np),f_np_ant)
-		X_list.append(X_list[i-1] + deltaX)
-		#print("### iteraction: ",i," ---- DELTA",deltaX)
 
-		f = changeValuesArray(functionArray, X_list[i])
+		#print("xlist -1  = ", X_list[i-1])
+
+		X_list.append(np.add(X_list[i-1], deltaX.transpose())[0])
+
+		#print("### iteraction: ",i," ---- DELTAX",deltaX)
+
+		f = changeValuesArrayBroyden(functionArray, X_list[i])
 		f_np = np.array(f).astype(np.float64)
 
 		lastY = f_np - f_np_ant
 
-		#print("### iteraction: ",i," ---- Y ",lastY)
+		#print("### iteraction: ",i," ---- Y",lastY)
 
 		tolk = np.linalg.norm(deltaX, ord=2) / np.linalg.norm(X_list[i], ord=2)
 		if (tolk < tolerance):
 			return X_list[i]
 		else:
-			testeDelta = np.asmatrix(deltaX)
-			deltaX_transp = np.transpose(deltaX)
-			testeDeltat = np.asmatrix(testeDelta.transpose())
-			print("delta x = ", testeDelta, "transp = ", deltaX_transp)
-			#TODO FIX DIVIDE MATRIX
-			deltaTimesDeltaTranspose =  np.dot(testeDeltat, testeDelta)
-			#print("delta times detal transp ", deltaTimesDeltaTranspose)
-			productOfMatrix = np.dot(lastY-np.dot(B_list[i-1], deltaX), deltaX_transp)
-			#print("DIVISION ",productOfMatrix)
-			next_B = B_list[i-1] + productOfMatrix / deltaTimesDeltaTranspose
-			B_list.append(next_B)
+			deltaX_transp = deltaX.transpose()
 
-		# print("### iteraction: ",i," ---- VALUE",X_list[i])
+			#print("### iteraction: ",i," ---- DELTAX_transp",deltaX_transp)
+
+		b_dividendo = np.dot(lastY-np.dot(np.asmatrix(B_list[i-1]), deltaX), deltaX_transp)
+		b_divisor = np.dot(deltaX_transp, deltaX)
+
+		next_B = B_list[i-1] + np.divide(b_dividendo, b_divisor)
+
+		#print("#### nextB", next_B.tolist())
+
+		B_list.append(next_B.tolist())
+
+		print("### iteraction: ",i," ---- VALUE",X_list[i])
 
 	return "Convergence not reached"
 
-functionArray3 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
+functionArray3 = np.array([[x+2*y-2], [(x**2)+4*(y**2)-4]])
 b0_broyden = np.array([[1,2],[4,24]])
 print(multiDimensionalBroydenMethod(functionArray3,[2,3],b0_broyden))
+
