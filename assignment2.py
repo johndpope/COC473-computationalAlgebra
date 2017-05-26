@@ -108,11 +108,24 @@ ponto = 2
 while(ponto <= 10):
 	A = polynomialIntegration(ponto,[0,4],testFunction5,x)
 	if(A == aValues[-1]):
-		print("RESULTADO QUESTAO 5 - ","VALOR DE A: ", A, "OBTIDO COM ",ponto," PONTOS","\n")
+		print("RESULTADO QUESTAO 5 - INTEGRACAO POLINOMIAL ","VALOR DE A: ", A, "OBTIDO COM ",ponto," PONTOS")
 		break;
 	else:
 		aValues.append(A)
 		ponto += 1
+
+
+#TODO FIX IT
+W = [0.5555555555555,0.888888889,0.5555555555555]
+Z = [0.774596,0,-0.774596]
+L = 4
+# Uses two points of integration
+x1 = 1/2*(0+4+Z[0]*L)
+x2 = 1/2*(0+4+Z[1]*L)
+f_x1 = testFunction5.subs(x,x1)
+f_x2 = testFunction5.subs(x,x2)
+A = (L/2)*(f_x1*W[0]+f_x2*W[1])
+print("RESULTADO QUESTAO 5 - QUADRATURA DE GAUSS ","VALOR DE A: ", A, "OBTIDO COM ",2," PONTOS","\n")
 
 # Question 6
 print("RESULTADOS QUESTAO 6","\n")
