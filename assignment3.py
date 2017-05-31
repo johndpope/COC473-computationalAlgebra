@@ -2,6 +2,8 @@ import numpy as np
 from math import *
 from copy import deepcopy
 from sympy import *
+from prettytable import PrettyTable 
+
 y, yy, t = symbols('y yy t')
 
 init_printing(use_unicode=True)
@@ -15,6 +17,16 @@ def changeValuesInFuction(function, valueArray):
 	for k in range(len(symbolsList)):
 		func = func.subs(symbolsList[k], valueArray[k])
 	return func
+
+
+def table(values, delta):
+	t = PrettyTable(["t", "Result"])
+
+	for i in range(len(values)):
+		t.add_row([delta*i, values[i]])
+	return t
+
+
 
 
 
@@ -168,14 +180,19 @@ def integrateMethod(function, delta, X0, maximumT, order):
 	global symbolsList
 	symbolsList = [t, y]
 
+	result = []
+
 	if (order == 1):
-		integrateEulerMethod(function, delta, X0, maximumT)
+		result = integrateEulerMethod(function, delta, X0, maximumT)
 	elif (order == 2):
-		integrateRungeKutta2Method(function, delta, X0, maximumT)
+		result = integrateRungeKutta2Method(function, delta, X0, maximumT)
 	elif (order == 4):
-		integrateRungeKutta4Method(function, delta, X0, maximumT)
+		result = integrateRungeKutta4Method(function, delta, X0, maximumT)
 	else:
 		print("Order not defined. Please choose 1, 2 or 4.")
+		return
+
+	print(table(result,delta),"\n\n")
 
 
 
@@ -188,24 +205,27 @@ def solveSecondOrder(function, delta, X0, XX0, maximumT, method):
 	global symbolsList
 	symbolsList = [t, y, yy]
 
+	result = []
+
 	if (method == 0):
-		taylorSerieAproximation(function, delta, X0, XX0, maximumT)
+		result = taylorSerieAproximation(function, delta, X0, XX0, maximumT)
 	elif (method == 1):
-		rungeKuttaNystrom(function, delta, X0, XX0, maximumT)
+		result = rungeKuttaNystrom(function, delta, X0, XX0, maximumT)
 	else:
 		print("Method not defined. Please choose 0 or 1.")
+		return
+
+	print(table(result, delta),"\n\n")
 
 
 
-function = -2*t*y**2
-y0 = 1
+
 
 sampleFunction = t + y
 
-integrateMethod(sampleFunction, 0.1, 0.0, 0.4, 1)
+integrateMethod(sampleFunction, 0.1, 0, 0.4, 1)
 
 sampleFunction2 = 2 * t + y + yy
 
-taylorSerieAproximation(sampleFunction2, 0.1, 0, 1, 2)
-rungeKuttaNystrom(sampleFunction2, 0.1, 0, 1, 2)
+solveSecondOrder(sampleFunction2, 0.1, 0, 1, 2, 1)
 
