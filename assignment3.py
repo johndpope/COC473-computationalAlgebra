@@ -1,4 +1,3 @@
-from numpy.linalg import inv
 import numpy as np
 from math import *
 from copy import deepcopy
@@ -21,6 +20,8 @@ def changeValuesInFuction(function, valueArray):
 
 ## 1 a) Euler Method
 def integrateEulerMethod(function, delta, X0, maximumT):
+	print("## Running Euler Method\n")
+
 	X_list = [X0]
 	t = 0
 	index = 0
@@ -38,6 +39,8 @@ def integrateEulerMethod(function, delta, X0, maximumT):
 
 ## 1 b) Runge-Kutta second-order Method
 def integrateRungeKutta2Method(function, delta, X0, maximumT):
+	print("## Running Runge-Kutta second-order Method\n")
+
 	X_list = [X0]
 	t = 0
 	index = 0
@@ -50,7 +53,7 @@ def integrateRungeKutta2Method(function, delta, X0, maximumT):
 		new_x = X_list[index] + delta/2 * (K1 + K2)
 		X_list.append(new_x)
 
-		# print("#### K1: ", K1, " ## K2: ", K2)
+		# print("#### t: ", t, " ## K1: ", K1: ", K1, " ## K2: ", K2)
 
 		index += 1
 		t = index * delta
@@ -61,6 +64,8 @@ def integrateRungeKutta2Method(function, delta, X0, maximumT):
 
 ## 1 c) Runge-Kutta fourth-order Method
 def integrateRungeKutta4Method(function, delta, X0, maximumT):
+	print("## Running Runge-Kutta fourth-order Method\n")
+
 	X_list = [X0]
 	t = 0
 	index = 0
@@ -75,7 +80,7 @@ def integrateRungeKutta4Method(function, delta, X0, maximumT):
 		new_x = X_list[index] + delta/6 * (K1 + 2*K2 + 2*K3 + K4)
 		X_list.append(new_x)
 
-		# print("#### K1: ", K1, " ## K2: ", K2, " ## K3: ", K3, " ## K4: ", K4)
+		# print("#### t: ", t, " ## K1: ", K1, " ## K2: ", K2, " ## K3: ", K3, " ## K4: ", K4)
 
 		index += 1
 		t = index * delta
@@ -88,6 +93,8 @@ def integrateRungeKutta4Method(function, delta, X0, maximumT):
 
 ## 2 a) Second order Taylor approximation
 def taylorSerieAproximation(function, delta, X0, XX0, maximumT):
+	print("## Running Second order Taylor approximation\n")
+
 	X_list = [X0]
 	XX_list = [XX0]
 	XXX_list = []
@@ -117,6 +124,8 @@ def taylorSerieAproximation(function, delta, X0, XX0, maximumT):
 
 ## 2 b) Runge Kutta Nystrom Method
 def rungeKuttaNystrom(function, delta, X0, XX0, maximumT):
+	print("## Running Runge Kutta Nystrom Method\n")
+
 	X_list = [X0]
 	XX_list = [XX0]
 	t = 0
@@ -138,7 +147,7 @@ def rungeKuttaNystrom(function, delta, X0, XX0, maximumT):
 		X_list.append(new_x)
 		XX_list.append(new_xx)
 
-		# print("#### K1: ", K1, " ## Q: ", Q, " ## K2: ", K2, " ## K3: ", K3, " ## L: ", L, " ## K4: ", K4)
+		# print("#### t: ", t, " ## K1: ", K1: ", K1, " ## Q: ", Q, " ## K2: ", K2, " ## K3: ", K3, " ## L: ", L, " ## K4: ", K4)
 
 		index += 1
 		t = index * delta
