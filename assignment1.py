@@ -3,6 +3,8 @@ import numpy as np
 from math import *
 from copy import deepcopy
 from sympy import *
+
+
 x,y,z = symbols('x y z')
 init_printing(use_unicode=True)
 
@@ -14,10 +16,18 @@ testFunction2 = 4*cos(x)- exp(2*x)
 
 
 
-## 1 Bissection Method
 def bissectionMethod(function,a,b,tol):
+	"""
+	Implements: Bissection Method
+	Arguments:
+		function: function to apply the method (sympy function)
+		a: begin of the analyzed interval (number)
+		b: end of the analyzed interval (number)
+		tol: error tolerance (number)
+	Return: root of analyzed function (number) 
+	"""
 	iterations = 0
-	while(abs(a-b) > tol and iterations <100):
+	while(abs(a-b) > tol and iterations < 1000):
 		rootPoint = (a+b)/2
 		rootValue = function.subs(x,rootPoint)
 		if(rootValue > 0):
@@ -30,11 +40,16 @@ def bissectionMethod(function,a,b,tol):
 #print(bissectionMethod(testFunction2,-30.0,10.0,tolerance))
 #print(bissectionMethod(testFunction1,-1000.0,1000.0,tolerance))
 
-
-
-## 2 Newton Method
 #TODO  - Metodo esta convergindo para valores que nao deveria (eg -50)
 def newtonMetod(function,initialValue,tol):
+	"""
+	Implements: Newthon Method
+	Arguments:
+		function: function to apply the method (sympy function)
+		initialValue: starting point (number)
+		tol: error tolerance (number)
+	Return: root of analyzed function (number) 
+	"""
 	iterations = 1000
 	rootPoint = initialValue
 	for i in range (iterations):
@@ -52,8 +67,16 @@ def newtonMetod(function,initialValue,tol):
 
 
 
-## 2 Secant Method
+
 def secantMethod(function,initialValue,tol):
+	"""
+	Implements: Secant Method
+	Arguments:
+		function: function to apply the method (sympy function)
+		initialValue: starting point (number)
+		tol: error tolerance (number)
+	Return: root of analyzed function (number) 
+	"""
 	iterations = 1000
 	rootPoint = initialValue
 	delta = 0.001
@@ -62,6 +85,7 @@ def secantMethod(function,initialValue,tol):
 	fa = function(lastRoot)
 	for i in range (iterations):
 		fi = function.subs(x,rootPoint)
+		# The line below is the main difference to Newton Method. We calculate the derivative using the definition
 		rootPoint = rootPoint - (fi * (rootPoint-lastRoot))/(fi-fa)
 		if(abs(rootPoint - lastRoot) < tol):
 			return rootPoint
@@ -76,8 +100,17 @@ def secantMethod(function,initialValue,tol):
 
 
 
-## 3 Inverse Interpolation Method
 def inverseInterpolationMethod(function,x1,x2,x3,tol):
+	"""
+	Implements: Inverse Interpolation Method
+	Arguments:
+		function: function to apply the method (sympy function)
+		x1,x2,x3: points to use in Langrange`s interpolation (number)
+		tol: error tolerance (number)
+	Return: root of analyzed function (number) 
+	"""
+
+	# We start x* (root of last iteration) as 10^36
 	lastRoot = pow(10,36)
 	iterations = 1000
 	x = [x1,x2,x3]
