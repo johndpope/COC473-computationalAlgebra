@@ -14,9 +14,6 @@ testFunction1 = log(cosh(x*sqrt(g*k))) - 50
 testFunction2 = 4*cos(x)- exp(2*x)
 
 
-#TODO: handle symbols for each function
-symbolsList = [x,y]
-
 # Support Functions
 
 def jacobian(funcArray):
@@ -61,6 +58,7 @@ def changeValuesArrayBroyden(array, valueArray):
 
 
 
+
 def bissectionMethod(function,a,b,tol):
 	"""
 	Implements: Bissection Method
@@ -71,6 +69,7 @@ def bissectionMethod(function,a,b,tol):
 		tol: error tolerance (number)
 	Return: root of analyzed function (number) 
 	"""
+	print("## Running Bissection Method\n")
 	iterations = 0
 	while(abs(a-b) > tol and iterations < 1000):
 		rootPoint = (a+b)/2
@@ -85,6 +84,9 @@ def bissectionMethod(function,a,b,tol):
 #print(bissectionMethod(testFunction2,-30.0,10.0,tolerance))
 #print(bissectionMethod(testFunction1,-1000.0,1000.0,tolerance))
 
+
+
+
 #TODO  - Metodo esta convergindo para valores que nao deveria (eg -50)
 def newtonMetod(function,initialValue,tol):
 	"""
@@ -95,6 +97,7 @@ def newtonMetod(function,initialValue,tol):
 		tol: error tolerance (number)
 	Return: root of analyzed function (number) 
 	"""
+	print("## Running Newton Method\n")
 	iterations = 1000
 	rootPoint = initialValue
 	for i in range (iterations):
@@ -122,6 +125,7 @@ def secantMethod(function,initialValue,tol):
 		tol: error tolerance (number)
 	Return: root of analyzed function (number) 
 	"""
+	print("## Running Secant Method\n")
 	iterations = 1000
 	rootPoint = initialValue
 	delta = 0.001
@@ -145,6 +149,7 @@ def secantMethod(function,initialValue,tol):
 
 
 
+
 def inverseInterpolationMethod(function,x1,x2,x3,tol):
 	"""
 	Implements: Inverse Interpolation Method
@@ -154,7 +159,7 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 		tol: error tolerance (number)
 	Return: root of analyzed function (number) 
 	"""
-
+	print("## Running Inverse Interpolation Method\n")
 	# We start x* (root of last iteration) as 10^36
 	lastRoot = pow(10,36)
 	iterations = 1000
@@ -179,14 +184,17 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 
 
 
-functionArray1 = np.array([16*(x**4)+16*(y**4)+(z**4)-16, (x**2)+(y**2)+(z**2)-3, (x**3)-y+z-1])
-functionArray2 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
 
 ## 4 Multi Dimensional Newton Method
-def multiDimensionalNewtonMethod(functionArray, X0):
+def multiDimensionalNewtonMethod(functionArray, X0, symbols):
+	print("## Running MultiDimensional Newton Method\n")
 	iterations = 15000
 	jacob = jacobian(functionArray)
 	lastX = X0
+
+	# define symbols that will be used
+	global symbolsList
+	symbolsList = symbols
 
 	for i in range(iterations):
 		j = changeValuesMatrix(jacob, lastX)
@@ -204,8 +212,9 @@ def multiDimensionalNewtonMethod(functionArray, X0):
 
 	return "Convergence not reached"
 
-
-# print(multiDimensionalNewtonMethod(functionArray1,[1,1,1]))
+functionArray1 = np.array([16*(x**4)+16*(y**4)+(z**4)-16, (x**2)+(y**2)+(z**2)-3, (x**3)-y+z-1])
+functionArray2 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
+# print(multiDimensionalNewtonMethod(functionArray1, [1,1,1], [x,y,z]))
 # t = [ 0.79040954,  0.80688815,  1.31308198]
 
 # print(16*(t[0]**4)+16*(t[1]**4)+(t[2]**4))
@@ -214,38 +223,33 @@ def multiDimensionalNewtonMethod(functionArray, X0):
 
 
 ## 4 Multi Dimensional Broyden Method
-def multiDimensionalBroydenMethod(functionArray, X0, B0):
+def multiDimensionalBroydenMethod(functionArray, X0, B0, symbols):
+	print("## Running MultiDimensional Broyden Method\n")
 	iterations = 15000
 	X_list = [X0]
 	B_list = [B0] 		# receive the jacobian of start
 
+	# define symbols that will be used
+	global symbolsList
+	symbolsList = symbols
+
 	for i in range(1, iterations+1):
 		j_np = B_list[i-1]
 
-		#print("### iteraction: ",i," ---- B",j_np)
-
 		f_ant = changeValuesArrayBroyden(functionArray, X_list[i-1])
 
-		#print("### iteraction: ",i," ---- f_ant",f_ant)
-
 		f_np_ant = np.array(f_ant).astype(np.float64)
-
-		#print("### iteraction: ",i," ---- f_np_ant",f_np_ant)
 		
 		deltaX = -np.dot(inv(j_np),f_np_ant)
 
-		#print("xlist -1  = ", X_list[i-1])
-
 		X_list.append(np.add(X_list[i-1], deltaX.transpose())[0])
-
-		#print("### iteraction: ",i," ---- DELTAX",deltaX)
 
 		f = changeValuesArrayBroyden(functionArray, X_list[i])
 		f_np = np.array(f).astype(np.float64)
 
 		lastY = f_np - f_np_ant
 
-		#print("### iteraction: ",i," ---- Y",lastY)
+		#print("### iteraction: ",i," B: ",j_np, " f_ant: ",f_ant, " f_np_ant: ",f_np_ant, " xlist -1: ", X_list[i-1], "deltaX: ",deltaX)
 
 		tolk = np.linalg.norm(deltaX, ord=2) / np.linalg.norm(X_list[i], ord=2)
 		if (tolk < tolerance):
@@ -253,14 +257,14 @@ def multiDimensionalBroydenMethod(functionArray, X0, B0):
 		else:
 			deltaX_transp = deltaX.transpose()
 
-			#print("### iteraction: ",i," ---- DELTAX_transp",deltaX_transp)
+			#print("### iteraction: ",i," deltaX_transp",deltaX_transp)
 
 		b_dividendo = np.dot(lastY-np.dot(np.asmatrix(B_list[i-1]), deltaX), deltaX_transp)
 		b_divisor = np.dot(deltaX_transp, deltaX)
 
 		next_B = B_list[i-1] + np.divide(b_dividendo, b_divisor)
 
-		#print("#### nextB", next_B.tolist())
+		#print("### nextB: ", next_B.tolist())
 
 		B_list.append(next_B.tolist())
 
@@ -270,5 +274,5 @@ def multiDimensionalBroydenMethod(functionArray, X0, B0):
 
 functionArray3 = np.array([[x+2*y-2], [(x**2)+4*(y**2)-4]])
 b0_broyden = np.array([[1,2],[4,24]])
-print(multiDimensionalBroydenMethod(functionArray3,[2,3],b0_broyden))
+print(multiDimensionalBroydenMethod(functionArray3, [2,3], b0_broyden, [x,y]))
 
