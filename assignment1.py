@@ -8,11 +8,8 @@ x,y,z = symbols('x y z')
 init_printing(use_unicode=True)
 
 tolerance = 0.0001
-g = 9.806
-k = 0.00341
-testFunction1 = log(cosh(x*sqrt(g*k))) - 50
+testFunction1 = log(cosh(x*sqrt(9.806*0.00341))) - 50
 testFunction2 = 4*cos(x)- exp(2*x)
-
 
 # Support Functions
 
@@ -97,7 +94,6 @@ def newtonMetod(function,initialValue,tol):
 		tol: error tolerance (number)
 	Return: root of analyzed function (number) 
 	"""
-	print("## Running Newton Method\n")
 	iterations = 100
 	rootPoint = initialValue
 	for i in range (iterations):
@@ -109,11 +105,11 @@ def newtonMetod(function,initialValue,tol):
 	else:
 		return "convergence not reached"
 
-print("Function 1 with initial point 200: ",newtonMetod(testFunction1,200,tolerance))
-print("Function 1 with initial point -200: ",newtonMetod(testFunction1,-200,tolerance))
-print("Function 2 with initial point -10: ",newtonMetod(testFunction2,-10,tolerance))
-print("Function 2 with initial point -15: ",newtonMetod(testFunction2,-15,tolerance))
-print("Function 2 with initial point -15: ",newtonMetod(testFunction2,-1,tolerance))
+# print("Function 1 with initial point 200: ",newtonMetod(testFunction1,200,tolerance))
+# print("Function 1 with initial point -200: ",newtonMetod(testFunction1,-200,tolerance))
+# print("Function 2 with initial point -10: ",newtonMetod(testFunction2,-10,tolerance))
+# print("Function 2 with initial point -15: ",newtonMetod(testFunction2,-15,tolerance))
+# print("Function 2 with initial point -15: ",newtonMetod(testFunction2,-1,tolerance))
 
 
 def secantMethod(function,initialValue,tol):
@@ -131,21 +127,29 @@ def secantMethod(function,initialValue,tol):
 	delta = 0.001
 	lastRoot = rootPoint
 	rootPoint = lastRoot + delta
-	fa = function(lastRoot)
+	fa = function.evalf(subs={x:lastRoot})
 	for i in range (iterations):
-		fi = function.subs(x,rootPoint)
+		fi = function.evalf(subs={x:rootPoint})
+		# We use temp as a X of the last Iteration
+		temp = lastRoot
+		# lastRoot assumes rot values before rootPoint update it value
+		lastRoot = rootPoint
 		# The line below is the main difference to Newton Method. We calculate the derivative using the definition
-		rootPoint = rootPoint - (fi * (rootPoint-lastRoot))/(fi-fa)
+		rootPoint = rootPoint - (fi * (rootPoint-temp))/(fi-fa)
+		print("Iteration: ",i)
+		print("rootPoint: ", rootPoint)
+		print("lastRoot ", lastRoot)
 		if(abs(rootPoint - lastRoot) < tol):
 			return rootPoint
 		else:
 			fa = fi
 	return "convergence not reached"
 
-#print(newtonMetod(testFuction1,200,tolerance))
-#print(newtonMetod(testFuction2,15,tolerance))
-#print(newtonMetod(testFuction2,-10,tolerance))
-#print(newtonMetod(testFuction2,-15,tolerance))
+# print("Function 1 with initial point 200: ",secantMethod(testFunction1,200,tolerance))
+# print("Function 1 with initial point -200: ",secantMethod(testFunction1,-200,tolerance))
+#print("Function 2 with initial point -10: ",secantMethod(testFunction2,-10,tolerance))
+# # print("Function 2 with initial point -15: ",secantMethod(testFunction2,-15,tolerance))
+# # print("Function 2 with initial point -8: ",secantMethod(testFunction2,-8,tolerance))
 
 
 
@@ -163,21 +167,24 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 	# We start x* (root of last iteration) as 10^36
 	lastRoot = pow(10,36)
 	iterations = 1000
-	x = [x1,x2,x3]
-	y = [0,0,0]
+	list_x = [x1,x2,x3]
+	list_y = [0,0,0]
+	#print(function.subs(x,1))
 	for i in range (iterations):
-		y[0],y[1],y[2] = function(x[0]),function(x[1]),function(x[2])
-		rootPoint = (y[1]*y[2]*x[0])/((y[0]-y[1])*(y[0]-y[2])) + (y[0]*y[2]*x[1])/((y[1]-y[0])*(y[1]-y[2])) + (y[0]*y[1]*x[2])/((y[2]-y[0])*(y[2]-y[1]))
+		list_y[0] = function.evalf(subs={x:list_x[0]})
+		list_y[1] = function.evalf(subs={x:list_x[1]})
+		list_y[2] = function.evalf(subs={x:list_x[2]})
+		rootPoint = (list_y[1]*list_y[2]*list_x[0])/((list_y[0]-list_y[1])*(list_y[0]-list_y[2])) + (list_y[0]*list_y[2]*list_x[1])/((list_y[1]-list_y[0])*(list_y[1]-list_y[2])) + (list_y[0]*list_y[1]*list_x[2])/((list_y[2]-list_y[0])*(list_y[2]-list_y[1]))
 		if(abs(rootPoint-lastRoot) < tol):
 			return rootPoint
 		else:
-			i = y.index(max(y))
-			x[i] = rootPoint
-			y[i] = function.subs(x,x[i])
+			i = list_y.index(max(list_y))
+			list_x[i] = rootPoint
+			list_y[i] = function.subs(x,list_x[i])
 			lastRoot = rootPoint
 	return "Convergence not reached"
 
-#print(inverseInterpolationMethod(testFuction1,200,250,260,tolerance))
+print(inverseInterpolationMethod(testFunction1,200,250,260,tolerance))
 
 
 
@@ -277,5 +284,5 @@ def multiDimensionalBroydenMethod(functionArray, X0, B0, tol, symbols):
 
 functionArray3 = np.array([[x+2*y-2], [(x**2)+4*(y**2)-4]])
 b0_broyden = np.array([[1,2],[4,24]])
-print(multiDimensionalBroydenMethod(functionArray3, [2,3], b0_broyden, tolerance, [x,y]))
+#print(multiDimensionalBroydenMethod(functionArray3, [2,3], b0_broyden, tolerance, [x,y]))
 
