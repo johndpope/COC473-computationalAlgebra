@@ -50,7 +50,7 @@ def newtonMetod(function,initialValue,tol):
 		tol: error tolerance (number)
 	Return: root of analyzed function (number) 
 	"""
-	iterations = 1000
+	iterations = 100
 	rootPoint = initialValue
 	for i in range (iterations):
 		lastRoot = rootPoint  
@@ -60,11 +60,9 @@ def newtonMetod(function,initialValue,tol):
 	else:
 		return "convergence not reached"
 
-#print(newtonMetod(testFunction1,200,tolerance))
-#print(newtonMetod(testFuction2,15,tolerance))
-#print(newtonMetod(testFuction2,-10,tolerance))
-#print(newtonMetod(testFuction2,-15,tolerance))
-
+print("Function 1 with initial point 200: ",newtonMetod(testFunction1,200,tolerance))
+print("Function 2 with initial point -10: ",newtonMetod(testFunction2,-10,tolerance))
+print("Function 2 with initial point -15: ",newtonMetod(testFunction2,-15,tolerance))
 
 
 
@@ -128,6 +126,9 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 	return "Convergence not reached"
 
 #print(inverseInterpolationMethod(testFuction1,200,250,260,tolerance))
+
+
+
 
 ## Multi dimensional systems
 ## Adjust of Nonlinear Functions
