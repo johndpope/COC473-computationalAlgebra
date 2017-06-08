@@ -2,7 +2,8 @@ import numpy as np
 from math import *
 from copy import deepcopy
 from sympy import *
-from prettytable import PrettyTable 
+from prettytable import PrettyTable
+import matplotlib.pyplot as plt
 
 y, yy, t = symbols('y yy t')
 
@@ -19,11 +20,11 @@ def changeValuesInFuction(function, valueArray):
 	return func
 
 
-def table(values, delta):
+def table(results):
 	t = PrettyTable(["t", "Result"])
 
-	for i in range(len(values)):
-		t.add_row([delta*i, values[i]])
+	for result in results:
+		t.add_row([result[0], result[1]])
 	return t
 
 
@@ -35,8 +36,9 @@ def integrateEulerMethod(function, delta, X0, maximumT):
 	print("## Running Euler Method\n")
 
 	X_list = [X0]
-	t = 0
+	t = 0.0
 	index = 0
+	results = [[t,X0]]
 
 	while (t < maximumT):
 		new_x = X_list[index] + delta * changeValuesInFuction(function, [t, X_list[index]])
@@ -45,7 +47,9 @@ def integrateEulerMethod(function, delta, X0, maximumT):
 		index += 1
 		t = index * delta
 
-	return X_list
+		results.append([t,new_x])
+
+	return results
 
 
 
@@ -54,8 +58,9 @@ def integrateRungeKutta2Method(function, delta, X0, maximumT):
 	print("## Running Runge-Kutta second-order Method\n")
 
 	X_list = [X0]
-	t = 0
+	t = 0.0
 	index = 0
+	results = [[t,X0]]
 
 	while (t < maximumT):
 
@@ -70,7 +75,9 @@ def integrateRungeKutta2Method(function, delta, X0, maximumT):
 		index += 1
 		t = index * delta
 
-	return X_list
+		results.append([t,new_x])
+
+	return results
 
 
 
@@ -79,8 +86,9 @@ def integrateRungeKutta4Method(function, delta, X0, maximumT):
 	print("## Running Runge-Kutta fourth-order Method\n")
 
 	X_list = [X0]
-	t = 0
+	t = 0.0
 	index = 0
+	results = [[t,X0]]
 
 	while (t < maximumT):
 
@@ -97,7 +105,9 @@ def integrateRungeKutta4Method(function, delta, X0, maximumT):
 		index += 1
 		t = index * delta
 
-	return X_list
+		results.append([t,new_x])
+
+	return results
 
 
 
@@ -110,8 +120,9 @@ def taylorSerieAproximation(function, delta, X0, XX0, maximumT):
 	X_list = [X0]
 	XX_list = [XX0]
 	XXX_list = []
-	t = 0
+	t = 0.0
 	index = 0
+	results = [[t,X0]]
 
 	while (t < maximumT):
 
@@ -130,7 +141,9 @@ def taylorSerieAproximation(function, delta, X0, XX0, maximumT):
 		index += 1
 		t = index * delta
 
-	return X_list
+		results.append([t,new_x])
+
+	return results
 
 
 
@@ -140,8 +153,9 @@ def rungeKuttaNystrom(function, delta, X0, XX0, maximumT):
 
 	X_list = [X0]
 	XX_list = [XX0]
-	t = 0
+	t = 0.0
 	index = 0
+	results = [[t,X0]]
 
 	while (t < maximumT):
 
@@ -164,7 +178,9 @@ def rungeKuttaNystrom(function, delta, X0, XX0, maximumT):
 		index += 1
 		t = index * delta
 
-	return X_list
+		results.append([t,new_x])
+
+	return results
 
 
 
@@ -180,19 +196,32 @@ def integrateMethod(function, delta, X0, maximumT, order):
 	global symbolsList
 	symbolsList = [t, y]
 
-	result = []
+	title = ""
+	results = []
 
 	if (order == 1):
-		result = integrateEulerMethod(function, delta, X0, maximumT)
+		title = "Order 1 - Euler Method"
+		results = integrateEulerMethod(function, delta, X0, maximumT)
 	elif (order == 2):
-		result = integrateRungeKutta2Method(function, delta, X0, maximumT)
+		title = "Order 2 - Runge-Kutta second-order Method"
+		results = integrateRungeKutta2Method(function, delta, X0, maximumT)
 	elif (order == 4):
-		result = integrateRungeKutta4Method(function, delta, X0, maximumT)
+		title = "Order 4 - Runge-Kutta fourth-order Method"
+		results = integrateRungeKutta4Method(function, delta, X0, maximumT)
 	else:
 		print("Order not defined. Please choose 1, 2 or 4.")
 		return
 
-	print(table(result,delta),"\n\n")
+	print(table(results),"\n\n")
+
+	x_val = [x[0] for x in results]
+	y_val = [x[1] for x in results]
+
+	plt.title(title)
+	plt.plot(x_val,y_val)
+	plt.plot(x_val,y_val,'or')
+	plt.xticks(x_val)
+	plt.show()
 
 
 
@@ -205,18 +234,29 @@ def solveSecondOrder(function, delta, X0, XX0, maximumT, method):
 	global symbolsList
 	symbolsList = [t, y, yy]
 
-	result = []
+	title = ""
+	results = []
 
 	if (method == 0):
-		result = taylorSerieAproximation(function, delta, X0, XX0, maximumT)
+		title = "Second order Taylor approximation"
+		results = taylorSerieAproximation(function, delta, X0, XX0, maximumT)
 	elif (method == 1):
-		result = rungeKuttaNystrom(function, delta, X0, XX0, maximumT)
+		title = "Runge Kutta Nystrom Method"
+		results = rungeKuttaNystrom(function, delta, X0, XX0, maximumT)
 	else:
 		print("Method not defined. Please choose 0 or 1.")
 		return
 
-	print(table(result, delta),"\n\n")
+	print(table(results),"\n\n")
 
+	x_val = [x[0] for x in results]
+	y_val = [x[1] for x in results]
+
+	plt.title(title)
+	plt.plot(x_val,y_val)
+	plt.plot(x_val,y_val,'or')
+	plt.xticks(x_val)
+	plt.show()
 
 
 
