@@ -4,7 +4,6 @@ from math import *
 from copy import deepcopy
 from sympy import *
 
-
 x,y,z = symbols('x y z')
 init_printing(use_unicode=True)
 
@@ -13,6 +12,52 @@ g = 9.806
 k = 0.00341
 testFunction1 = log(cosh(x*sqrt(g*k))) - 50
 testFunction2 = 4*cos(x)- exp(2*x)
+
+
+#TODO: handle symbols for each function
+symbolsList = [x,y]
+
+# Support Functions
+
+def jacobian(funcArray):
+	global symbolsList
+	functionArray = deepcopy(funcArray)
+	jacobian = []
+	for i in range(functionArray.size):
+		temp = []
+		for j in range(len(symbolsList)):
+			temp.append(diff(functionArray[i], symbolsList[j]))
+		jacobian.append(temp)
+	return jacobian
+
+
+def changeValuesMatrix(matrix, valueArray):
+	global symbolsList
+	functionMatrix = deepcopy(matrix)
+	for i in range(len(functionMatrix)):
+		for j in range(len(functionMatrix[i])):
+			for k in range(len(symbolsList)):
+				functionMatrix[i][j] = functionMatrix[i][j].subs(symbolsList[k], valueArray[k])
+	return functionMatrix
+
+
+def changeValuesArray(array, valueArray):
+	global symbolsList
+	functionArray = deepcopy(array)
+	for i in range(len(functionArray)):
+		for k in range(len(symbolsList)):
+				functionArray[i] = functionArray[i].subs(symbolsList[k], valueArray[k])
+	return functionArray
+
+
+def changeValuesArrayBroyden(array, valueArray):
+	global symbolsList
+	functionArray = deepcopy(array)
+	for i in range(len(functionArray)):
+		for j in range(len(functionArray[i])):
+			for k in range(len(symbolsList)):
+				functionArray[i][j] = functionArray[i][j].subs(symbolsList[k], valueArray[k])
+	return functionArray
 
 
 
@@ -131,47 +176,8 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 
 ## Multi dimensional systems
 ## Adjust of Nonlinear Functions
-#TODO: handle symbols for each function
-symbolsList = [x,y]
 
-def jacobian(funcArray):
-	jacobian = []
-	 
-	# TODO: check if need to get symbolslist from functionArray
-	# symbolsSet = []
-	# for i in functionArray:
-	# 	s = i.free_symbols
-	# 	if len(s) > len(symbolsSet):
-	# 		symbolsSet = s
 
-	# symbolsList = list(symbolsSet)
-
-	global symbolsList
-	functionArray = deepcopy(funcArray)
-	
-	for i in range(functionArray.size):
-		temp = []
-		for j in range(len(symbolsList)):
-			temp.append(diff(functionArray[i], symbolsList[j]))
-		jacobian.append(temp)
-	return jacobian
-
-def changeValuesMatrix(matrix, valueArray):
-	global symbolsList
-	functionMatrix = deepcopy(matrix)
-	for i in range(len(functionMatrix)):
-		for j in range(len(functionMatrix[i])):
-			for k in range(len(symbolsList)):
-				functionMatrix[i][j] = functionMatrix[i][j].subs(symbolsList[k], valueArray[k])
-	return functionMatrix
-
-def changeValuesArray(array, valueArray):
-	global symbolsList
-	functionArray = deepcopy(array)
-	for i in range(len(functionArray)):
-		for k in range(len(symbolsList)):
-				functionArray[i] = functionArray[i].subs(symbolsList[k], valueArray[k])
-	return functionArray
 
 functionArray1 = np.array([16*(x**4)+16*(y**4)+(z**4)-16, (x**2)+(y**2)+(z**2)-3, (x**3)-y+z-1])
 functionArray2 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
@@ -205,15 +211,6 @@ def multiDimensionalNewtonMethod(functionArray, X0):
 # print(16*(t[0]**4)+16*(t[1]**4)+(t[2]**4))
 
 
-
-def changeValuesArrayBroyden(array, valueArray):
-	global symbolsList
-	functionArray = deepcopy(array)
-	for i in range(len(functionArray)):
-		for j in range(len(functionArray[i])):
-			for k in range(len(symbolsList)):
-				functionArray[i][j] = functionArray[i][j].subs(symbolsList[k], valueArray[k])
-	return functionArray
 
 
 ## 4 Multi Dimensional Broyden Method
