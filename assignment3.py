@@ -21,12 +21,22 @@ def changeValuesInFuction(function, valueArray):
 
 
 def table(results):
-	t = PrettyTable(["t", "Result"])
+	table = PrettyTable(["t", "Result"])
 
 	for result in results:
-		t.add_row([result[0], result[1]])
-	return t
+		table.add_row([result[0], result[1]])
+	return table
 
+def tableComparison(results, exactSolution):
+	func = deepcopy(exactSolution)
+	table = PrettyTable(["t", "Result", "Exact Solution"])
+
+	print("func: ", func)
+
+	for result in results:
+		print("result: ", result)
+		table.add_row([result[0], result[1], func.subs(t,result[0])])
+	return table
 
 
 
@@ -187,7 +197,7 @@ def rungeKuttaNystrom(function, delta, X0, XX0, maximumT):
 
 
 ## 1 ODE First-Order
-def integrateMethod(function, delta, X0, maximumT, order):
+def integrateMethod(function, delta, X0, maximumT, order, exactSolution = 0):
 	# order 1 = Euler Method
 	# order 2 = Runge-Kutta second-order Method
 	# order 4 = Runge-Kutta fourth-order Method
@@ -212,7 +222,10 @@ def integrateMethod(function, delta, X0, maximumT, order):
 		print("Order not defined. Please choose 1, 2 or 4.")
 		return
 
-	print(table(results),"\n\n")
+	if exactSolution == 0:
+		print(table(results),"\n\n")
+	else:
+		print(tableComparison(results, exactSolution),"\n\n")
 
 	x_val = [x[0] for x in results]
 	y_val = [x[1] for x in results]
@@ -226,7 +239,7 @@ def integrateMethod(function, delta, X0, maximumT, order):
 
 
 ## 2 ODE Second-Order
-def solveSecondOrder(function, delta, X0, XX0, maximumT, method):
+def solveSecondOrder(function, delta, X0, XX0, maximumT, method, exactSolution = 0):
 	# method 0 = Second order Taylor approximation
 	# method 1 = Runge Kutta Nystrom Method
 
@@ -247,7 +260,11 @@ def solveSecondOrder(function, delta, X0, XX0, maximumT, method):
 		print("Method not defined. Please choose 0 or 1.")
 		return
 
-	print(table(results),"\n\n")
+	if exactSolution == 0:
+		print(table(results),"\n\n")
+	else:
+		print(tableComparison(results, exactSolution),"\n\n")
+
 
 	x_val = [x[0] for x in results]
 	y_val = [x[1] for x in results]
@@ -263,9 +280,15 @@ def solveSecondOrder(function, delta, X0, XX0, maximumT, method):
 
 sampleFunction = t + y
 
-integrateMethod(sampleFunction, 0.1, 0, 0.4, 1)
+functionAssignmet = -2*t*(y**2)
+exactSolution = 1/(1+t**2)
+
+integrateMethod(functionAssignmet, 0.1, 1, 2, 4)
+#integrateMethod(functionAssignmet, 0.1, 1, 2, 4, exactSolution)
+
+#integrateMethod(sampleFunction, 0.1, 0, 0.4, 1)
 
 sampleFunction2 = 2 * t + y + yy
 
-solveSecondOrder(sampleFunction2, 0.1, 0, 1, 2, 1)
+#solveSecondOrder(sampleFunction2, 0.1, 0, 1, 2, 1)
 
