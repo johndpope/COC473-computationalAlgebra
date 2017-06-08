@@ -186,7 +186,7 @@ def inverseInterpolationMethod(function,x1,x2,x3,tol):
 
 
 ## 4 Multi Dimensional Newton Method
-def multiDimensionalNewtonMethod(functionArray, X0, symbols):
+def multiDimensionalNewtonMethod(functionArray, X0, tol, symbols):
 	print("## Running MultiDimensional Newton Method\n")
 	iterations = 15000
 	jacob = jacobian(functionArray)
@@ -207,14 +207,14 @@ def multiDimensionalNewtonMethod(functionArray, X0, symbols):
 		lastX = lastX + deltaX
 
 		tolk = np.linalg.norm(deltaX, ord=2) / np.linalg.norm(lastX, ord=2)
-		if (tolk < tolerance):
+		if (tolk < tol):
 			return lastX
 
 	return "Convergence not reached"
 
 functionArray1 = np.array([16*(x**4)+16*(y**4)+(z**4)-16, (x**2)+(y**2)+(z**2)-3, (x**3)-y+z-1])
 functionArray2 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
-# print(multiDimensionalNewtonMethod(functionArray1, [1,1,1], [x,y,z]))
+# print(multiDimensionalNewtonMethod(functionArray1, [1,1,1], tolerance, [x,y,z]))
 # t = [ 0.79040954,  0.80688815,  1.31308198]
 
 # print(16*(t[0]**4)+16*(t[1]**4)+(t[2]**4))
@@ -223,7 +223,7 @@ functionArray2 = np.array([x+2*y-2,(x**2)+4*(y**2)-4])
 
 
 ## 4 Multi Dimensional Broyden Method
-def multiDimensionalBroydenMethod(functionArray, X0, B0, symbols):
+def multiDimensionalBroydenMethod(functionArray, X0, B0, tol, symbols):
 	print("## Running MultiDimensional Broyden Method\n")
 	iterations = 15000
 	X_list = [X0]
@@ -252,7 +252,7 @@ def multiDimensionalBroydenMethod(functionArray, X0, B0, symbols):
 		#print("### iteraction: ",i," B: ",j_np, " f_ant: ",f_ant, " f_np_ant: ",f_np_ant, " xlist -1: ", X_list[i-1], "deltaX: ",deltaX)
 
 		tolk = np.linalg.norm(deltaX, ord=2) / np.linalg.norm(X_list[i], ord=2)
-		if (tolk < tolerance):
+		if (tolk < tol):
 			return X_list[i]
 		else:
 			deltaX_transp = deltaX.transpose()
@@ -274,5 +274,5 @@ def multiDimensionalBroydenMethod(functionArray, X0, B0, symbols):
 
 functionArray3 = np.array([[x+2*y-2], [(x**2)+4*(y**2)-4]])
 b0_broyden = np.array([[1,2],[4,24]])
-print(multiDimensionalBroydenMethod(functionArray3, [2,3], b0_broyden, [x,y]))
+print(multiDimensionalBroydenMethod(functionArray3, [2,3], b0_broyden, tolerance, [x,y]))
 
