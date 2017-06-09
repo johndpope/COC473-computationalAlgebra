@@ -4,23 +4,28 @@ from sympy import *
 x,y,z,w = symbols('x y z w')
 init_printing(use_unicode=True)
 
-def polynomialIntegration(numberOfpoints,interval,function,IntegrationTerm,show = False):
-	# If numberOfPoints is less than 5, calculates the derivative using the given interval
-	# Although, if numberOfPoints is bigger than 5, converts the interval to the Legendre-Gauss interval [-1,1] 
-	delta = (interval[1]-interval[0])/(numberOfpoints-1)
-	points =[]
+def Quadrature(numberOfpoints,interval,function,IntegrationTerm,show = False):
+	"""
+	Implements: Quadrature
+	Arguments:
+		numberOfpoints: number of interpolation points (number)
+		interval: range of integration (list)
+		function: function to apply the methos (sympy function)
+		IntegrationTerm: term to integrate the function (string)
+		show : active DEBUG mode (boolean)
+	Return: integral of analyzed function (number) 
+	"""
 
 	# Points is a list of lists
 	# Each list contain the points to use when the user set N points
-
-	for n in range(0,5):
-		nPoints = []
-		for n in range(0,5):
-			nPoints.append(interval[0] + n*delta)
-		points.append(nPoints)
-
-	# Points [6,10] extracted from https://pomax.github.io/bezierinfo/legendre-gauss.html
-
+	delta = (interval[1]-interval[0])/(numberOfpoints-1)
+	points = []
+	# Points [2,10] extracted from https://pomax.github.io/bezierinfo/legendre-gauss.html
+	points.append([0])
+	points.append([-0.5773502691896257,0.5773502691896257])
+	points.append([0.0000000000000000,-0.7745966692414834,0.7745966692414834])
+	points.append([-0.3399810435848563,0.3399810435848563,-0.8611363115940526,0.8611363115940526])
+	points.append([0.0000000000000000,-0.5384693101056831,0.5384693101056831,-0.9061798459386640,0.9061798459386640])
 	points.append([0.6612093864662645,-0.6612093864662645,-0.2386191860831969,0.2386191860831969,-0.9324695142031521,0.9324695142031521])
 	points.append([0,0.4058451513773972,-0.4058451513773972,-0.7415311855993945,0.7415311855993945,-0.9491079123427585,0.9491079123427585])
 	points.append([-0.1834346424956498,0.1834346424956498,-0.5255324099163290,0.5255324099163290,-0.7966664774136267,0.7966664774136267,-0.9602898564975363,0.9602898564975363])
@@ -31,16 +36,15 @@ def polynomialIntegration(numberOfpoints,interval,function,IntegrationTerm,show 
 	if(show):
 		print("PONTOS: ",points[elementIndex])
 
-	l = points[elementIndex][-1] - points[elementIndex][0]
 	# Weights is a list of lists
 	# Each list contain the weight to use when the user set N points
 	# Weights extracted from https://pomax.github.io/bezierinfo/legendre-gauss.html
 
-	weights = [[l],
-			  [l/2,l/2],
-			  [l/2,(2*l)/3,l/6],
-			  [l/8,(3*l)/8,(3*l)/8,l/8],
-			  [(7*l)/90,(16*l)/45,(2*l)/15,(16*l)/45,(7*l/90)],
+	weights = [[1],
+			  [1.0000000000000000,1.0000000000000000],
+			  [0.8888888888888888,0.5555555555555556,0.5555555555555556],
+			  [0.6521451548625461,0.6521451548625461,0.3478548451374538,0.3478548451374538],
+			  [0.5688888888888889,0.4786286704993665,0.4786286704993665,0.2369268850561891,0.2369268850561891],
 			  [0.3607615730481386,0.3607615730481386,0.4679139345726910,0.4679139345726910,0.1713244923791704,0.1713244923791704],
 			  [0.4179591836734694,0.3818300505051189,0.3818300505051189,0.3818300505051189,0.2797053914892766,0.1294849661688697,0.1294849661688697],
 			  [0.3626837833783620,0.3626837833783620,0.3137066458778873,0.3137066458778873,0.2223810344533745,0.2223810344533745,0.1012285362903763,0.1012285362903763],
@@ -57,10 +61,6 @@ def polynomialIntegration(numberOfpoints,interval,function,IntegrationTerm,show 
 			functionValue = function.subs(IntegrationTerm,adjustTerm*points[elementIndex][i] + (interval[-1]+interval[0])/2)
 			weight = selectWeightArray[i]
 			result += adjustTerm*(functionValue * weight)
-		else:
-			functionValue = function.subs(IntegrationTerm,points[elementIndex][i])
-			weight = selectWeightArray[i]
-			result += functionValue * weight
 		if(show):	
 			print ("RESULTADO PARA ",i+1," PONTOS: ",result)
 	return result
@@ -113,7 +113,6 @@ while(ponto <= 10):
 	else:
 		aValues.append(A)
 		ponto += 1
-
 
 #TODO FIX IT
 W = [0.5555555555555,0.888888889,0.5555555555555]
