@@ -1,10 +1,12 @@
 import numpy as np
+from numpy.linalg import inv
+from numpy import matrix
 from math import *
 from sympy import *
 x,y,z,w = symbols('x y z w')
 init_printing(use_unicode=True)
 
-def Quadrature(numberOfpoints,interval,function,IntegrationTerm,show = False):
+def quadrature(numberOfpoints,interval,function,IntegrationTerm,show = False):
 	"""
 	Implements: Quadrature
 	Arguments:
@@ -18,7 +20,6 @@ def Quadrature(numberOfpoints,interval,function,IntegrationTerm,show = False):
 
 	# Points is a list of lists
 	# Each list contain the points to use when the user set N points
-	delta = (interval[1]-interval[0])/(numberOfpoints-1)
 	points = []
 	# Points [2,10] extracted from https://pomax.github.io/bezierinfo/legendre-gauss.html
 	points.append([0])
@@ -55,14 +56,38 @@ def Quadrature(numberOfpoints,interval,function,IntegrationTerm,show = False):
 	result = 0;
 
 	for i in range(len(points[elementIndex])):
-		if(numberOfpoints > 5):
-			adjustTerm = (interval[-1]-interval[0])/2
-			# Adjusts the function to work using the weights and points of Legendre-Gauss interval [-1,1]
-			functionValue = function.subs(IntegrationTerm,adjustTerm*points[elementIndex][i] + (interval[-1]+interval[0])/2)
-			weight = selectWeightArray[i]
-			result += adjustTerm*(functionValue * weight)
+		adjustTerm = (interval[-1]-interval[0])/2
+		# Adjusts the function to work using the weights and points of Legendre-Gauss interval [-1,1]
+		functionValue = function.subs(IntegrationTerm,adjustTerm*points[elementIndex][i] + (interval[-1]+interval[0])/2)
+		weight = selectWeightArray[i]
+		result += adjustTerm*(functionValue * weight)
 		if(show):	
 			print ("RESULTADO PARA ",i+1," PONTOS: ",result)
+	return result
+
+
+def polynomialIntegration(N,interval,function,IntegrationTerm,show = False):
+	a,b = interval[0],interval[1]
+	if N == 1:
+		x = [(a + b)/2]
+	else:
+		delta = (b - a)/(N - 1)
+		x = []
+		for i in range(N):
+			x.append(a + i * delta)
+	vandermonde = []
+	for rowExpoent in range(N):
+		row = []
+		for column in range(N):
+			row.append(x[column ]**rowExpoent)
+		vandermonde.append(row)
+	y = []
+	for j in range(1,N+1):
+		y.append([(b ** j - a ** j)/j])
+	w = list((inv(vandermonde) * matrix(y)).flat)
+	result = 0
+	for i in range(N):
+		result += w[i] * function.evalf(subs={IntegrationTerm:x[i]})
 	return result
 
 # Question 2
@@ -70,6 +95,11 @@ def Quadrature(numberOfpoints,interval,function,IntegrationTerm,show = False):
 testFunction1 = exp(-x**2)
 testFunction2 = (1/2)*np.pi*exp((-1/2)*(x**2))
 N = 10
+print("RESULTADO QUESTAO 2 - FUNCAO 1 (5 PONTOS)(Integração polinomial): ",polynomialIntegration(5,[0,1],testFunction1,x))
+print("RESULTADO QUESTAO 2 - FUNCAO 1 (5 PONTOS)(Quadratura): ",quadrature(5,[0,1],testFunction1,x))
+print("RESULTADO QUESTAO 2 - FUNCAO 2 (5 PONTOS)(Integração polinomial): ",polynomialIntegration(5,[0,1],testFunction2,x),"\n")
+print("RESULTADO QUESTAO 2 - FUNCAO 2 (5 PONTOS)(Quadratura): ",quadrature(5,[0,1],testFunction2,x),"\n")
+
 print("RESULTADO QUESTAO 2 - FUNCAO 1 (10 PONTOS): ",polynomialIntegration(10,[0,1],testFunction1,x))
 print("RESULTADO QUESTAO 2 - FUNCAO 2 (10 PONTOS): ",polynomialIntegration(10,[0,1],testFunction2,x),"\n")
 
@@ -84,8 +114,8 @@ testFunction4 = (w**2)*(RAO**2)*Sn
 m0 = polynomialIntegration(6,[0,10],testFunction3,w)
 m2 = polynomialIntegration(10,[0,10],testFunction4,w)
 
-print("RESUTADO QUESTAO 3 - m0: ",m0)
-print("RESUTADO QUESTAO 3 - m2: ",m2,"\n")
+# print("RESUTADO QUESTAO 3 - m0: ",m0)
+# print("RESUTADO QUESTAO 3 - m2: ",m2,"\n")
 
 # Question 4
 # Change the Sn value used at question 3. 
@@ -97,8 +127,8 @@ Sn = ((4 * (np.pi)**3 * (Hs)**2)/(w**5 * Tz**4))*exp((-16*np.pi**3)/(w**4 * Tz**
 m0_2 = polynomialIntegration(10,[0,10],testFunction3,w)
 m2_2 = polynomialIntegration(10,[0,10],testFunction4,w)
 
-print("RESULTADO QUESTAO 4 m0: ",m0_2)
-print("RESULTADO QUESTAO 4 m2: ",m2_2,"\n")
+# print("RESULTADO QUESTAO 4 m0: ",m0_2)
+# print("RESULTADO QUESTAO 4 m2: ",m2_2,"\n")
 
 # Question 5
 
@@ -124,22 +154,22 @@ x2 = 1/2*(0+4+Z[1]*L)
 f_x1 = testFunction5.subs(x,x1)
 f_x2 = testFunction5.subs(x,x2)
 A = (L/2)*(f_x1*W[0]+f_x2*W[1])
-print("RESULTADO QUESTAO 5 - QUADRATURA DE GAUSS ","VALOR DE A: ", A, "OBTIDO COM ",2," PONTOS","\n")
+# print("RESULTADO QUESTAO 5 - QUADRATURA DE GAUSS ","VALOR DE A: ", A, "OBTIDO COM ",2," PONTOS","\n")
 
 # Question 6
-print("RESULTADOS QUESTAO 6","\n")
+# print("RESULTADOS QUESTAO 6","\n")
 testFunction6 = 1/(1+x**2)
 interval = [0,3]
 
 # Result using mid point rule
 m = (interval[1]+interval[0])/2
 A_mid = testFunction6.subs(x,m) * (interval[1]-interval[0])
-print("RESULTADO DA TECNICA DO PONTO MEDIO: ", A_mid)
+# print("RESULTADO DA TECNICA DO PONTO MEDIO: ", A_mid)
 
 # Result using trapeze rule
 A_t = ((testFunction6.subs(x,interval[0])+testFunction6.subs(x,interval[1]))/2.0) * (interval[1]-interval[0])
-print("RESULTADO DA TECNICA DO TRAPEZIO: ", A_t)
+# print("RESULTADO DA TECNICA DO TRAPEZIO: ", A_t)
 
 # Result using numeric method
 A = polynomialIntegration(ponto,interval,testFunction6,x)
-print("RESULTADO DA RESOLUCAO NUMERICA: ", A)
+# print("RESULTADO DA RESOLUCAO NUMERICA: ", A)
